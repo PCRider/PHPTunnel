@@ -1,0 +1,47 @@
+{
+    "title": "PHPTunnel Admin",
+    "name": "phptunnel_admin",
+    "version": "1.0.0",
+    "description": "a Setting Page for phptunnel application",
+    "keywords": [
+        "css",
+        "sass",
+        "html",
+        "responsive",
+        "theme",
+        "template",
+        "admin",
+        "app"
+    ],
+    "license": "MIT",
+    "author": "Ehsan AlemMohammadGhasemlou",
+    "contributors": [
+        "Ehsan AlemMohammadGhasemlou (http://pcrider.com/)"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/PCRider/PHPTunnel.git"
+    },
+    "dependencies": {
+        "popper": "",
+        "bootstrap": "",
+        "chart.js": "",
+        "datatables.net-bs4": "",
+        "font-awesome": "",
+        "jquery": "",
+        "jquery.easing": ""
+    },
+    "devDependencies": {
+        "browser-sync": "",
+        "gulp": "",
+        "gulp-clean-css": "",
+        "gulp-cli": "",
+        "gulp-header": "",
+        "gulp-html-beautify": "",
+        "gulp-rename": "",
+        "gulp-sass": "",
+        "gulp-uglify": "",
+        "popper": "",
+        "pug": ""
+    }
+}
