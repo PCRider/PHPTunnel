@@ -3,6 +3,41 @@
 error_reporting( E_ALL );
 require_once('cfg.php');
 
+function RFC1123Date(){
+   return gmdate('D, d M Y H:i:s T', time()); 
+}  
+
+function LogLine($ll,$msg, $dest="./log",$lname="log",$lsize=10000) {
+	# Is the log directory writable?
+        if(!file_exists ( $dest )){
+            mkdir ( $dest , 0777  );
+        }
+//    if ( !$CONFIG['enable_logging'] &&  $CONFIG['log_level'] < $ll ) {
+//        return
+//    }
+		# Filename to save as
+		$file = $dest . '/' . $lname ."-". date('Y-m-d') . '.log';
+        
+        
+        if(!file_exists ( $file )){
+            touch( $file );
+            
+        }
+        # i could do it with fstat($filehandle)["size"] but this is a cleanner way when i am using file_put_contents()
+        else if (filesize($file) > $lsize) {
+            # i could use date("d.m.Y H:i:s")
+            file_put_contents ($file, RFC1123Date() ." - Logfile reached maximum size ($lsize)- rotating.\r\n", FILE_APPEND);
+	        rename ($file,"$file.old");
+	        file_put_contents($file, RFC1123Date() ." - Opening new Logfile.\r\n", FILE_APPEND);
+        }
+        
+		# Line to write
+		$towrite = str_pad($_SERVER['REMOTE_ADDR'] . ', ' , 17) . RFC1123Date() . ', ' . $_SERVER['PHP_SELF'] ."\r\n". $msg . "\r\n";
+
+		# Do it (I could do it in a nasty way fopen() fwrite() fclose())
+		file_put_contents($file, $towrite, FILE_APPEND);
+}
+
 
 
 /**
@@ -85,6 +120,95 @@ function OutputERR($msg,$td,$key){
     mcrypt_generic_deinit($td);
     mcrypt_module_close($td);
     die();
+}
+
+function GetHeaderPartValue($http_header,$part){
+	
+	$http_header_lines = explode("\r\n", $http_header);
+	$http_header_lines_count = count($http_header_lines);
+	
+	$http_address = '';
+	$http_port = 0;
+	#we begin with one because the 0th position is for request type(GET POST ...)
+	$i = 1;
+	# minus 2 because of first and last \r\n
+	while($i < $http_header_lines_count - 2)
+	{
+		$http_header_line = $http_header_lines[$i];
+		$http_header_line_array = explode(': ', $http_header_line);
+		$http_header_line_array_count = count($http_header_line_array);
+		if($http_header_line_array_count == 2)
+		{
+			$http_header_line_key = $http_header_line_array[0];
+			$http_header_line_value = $http_header_line_array[1];
+			$HTTPHeader[$http_header_line_key]=$http_header_line_value;
+			if(strtoupper($http_header_line_key) == strtoupper($part))
+			{
+				//$return = $http_header_line_value;
+				return $http_header_line_value;
+				//break;
+			}
+		}
+		$i = $i + 1;
+		
+	}
+	//return $http_header_line_value;
+}
+function OpenSocket($http_header_value,$force,$IOHandle,$td){
+//	$http_header_key = $http_header_key_value[0];
+//	$http_header_value = $http_header_key_value[1];
+	$http_header_host_parts = explode(':', $http_header_value);
+	$http_header_host_parts_length = count($http_header_host_parts);
+	if($http_header_host_parts_length == 1)
+	{
+		$http_address = $http_header_host_parts[0];
+		$http_port = $force;
+	}
+	else
+	{
+		if($http_header_host_parts_length == 2)
+		{
+			$http_address = $http_header_host_parts[0];
+			$http_port = $http_header_host_parts[1];
+		}
+	}
+	if ($force == 80){
+	    $SocketHandle = fsockopen($http_address, $http_port);
+	}
+	elseif($force == 443){
+	     $SocketHandle = fsockopen('ssl://' . $http_address, $http_port);
+	}
+	if(!$SocketHandle){
+		fclose($IOHandle);
+		mcrypt_generic_deinit($td);
+		mcrypt_module_close($td);
+		header('HTTP/1.0 500 Internal Server Error');
+		die();
+	}
+	return $SocketHandle;
+}
+function TransferData($from,$to,$td,$type){
+    while(!feof($from)){
+			$buffer = fread($from, 5120);
+			$buffer_length = strlen($buffer);
+		if($buffer_length > 0){
+		    if($type =="crypt"){
+		        fwrite($to, mcrypt_generic($td, $buffer));
+		    }
+			else if($type =="decrypt"){
+	        	fwrite($to, mdecrypt_generic($td, $buffer));
+	        }
+		}
+	}
+}
+function sendcutomheader(){
+    for($i = 0; $i < count($RESPONSE_PROPERTY_KEY); $i = $i + 1)
+		{
+			if($RESPONSE_PROPERTY_KEY[$i] != '')
+			{
+				header($RESPONSE_PROPERTY_KEY[$i] . ': ' . $RESPONSE_PROPERTY_VALUE[$i]);
+			}
+		}
 }
 /*
  * Copyright 2011 Michael Cutler <m@cotdp.com>

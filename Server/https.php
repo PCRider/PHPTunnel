@@ -1,5 +1,5 @@
 <?php
-#http
+#https
 require_once('lib.php');
 $key = $CONFIG['KEY'];
 LogLine(2,"Key: {$CONFIG['KEY']}");
@@ -13,8 +13,9 @@ LogLine(2,"Header: $http_header");
  $http_header_line_value=GetHeaderPartValue($http_header,"Host");
 //$parsed_header = http_parse_headers ( $http_header );
 //$http_header_line_value = $parsed_header['Host'];
+//LogLine(2,"Header: print_r($parsed_header)");
 
-$SocketHandle=OpenSocket($http_header_line_value,80,$inputHandle,$td);
+$SocketHandle=OpenSocket($http_header_line_value,443,$inputHandle,$td);
 LogLine(2,"Socket: $SocketHandle");
 fwrite($SocketHandle, $http_header);
 TransferData($inputHandle,$SocketHandle,$td,"decrypt");
