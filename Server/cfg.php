@@ -1,4 +1,9 @@
 <?php
-#cfg
-$CONFIG['KEY'] = 'VAhUf2ZcvEmbtT1Y';
-?>
+// config/config.php
+
+$config = [
+    'cryptography' => [
+        'key' => 'VAhUf2ZcvEmbtT1Y',
+    ]
+    
+];

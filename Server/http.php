@@ -1,8 +1,8 @@
 <?php
 #http
 require_once('lib.php');
-$key = $CONFIG['KEY'];
-LogLine(2,"Key: {$CONFIG['KEY']}");
+$key = $config['cryptography']['key'];
+LogLine(2,"Key: {$config['cryptography']['key']}");
 $td = OpenCryptModule($key);
 LogLine(2,"Cript: $td ");
 $inputHandle = OpenRawIO($td, 'php://input', 'r', null);
