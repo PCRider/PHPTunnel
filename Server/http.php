@@ -3,7 +3,7 @@
 require_once('lib.php');
 $key = $config['cryptography']['key'];
 LogLine(2,"Key: {$config['cryptography']['key']}");
-$td = OpenCryptModule($key);
+//$td = OpenCryptModule($key);
 LogLine(2,"Cript: $td ");
 $inputHandle = OpenRawIO($td, 'php://input', 'r', null);
 LogLine(2,"Input: $inputHandle");
@@ -22,7 +22,7 @@ LogLine(2,"data transfered: done");
 fclose($inputHandle);
 //mcrypt_generic_deinit($td);
 //mcrypt_module_close($td);
-$td = OpenCryptModule($key);
+//$td = OpenCryptModule($key);
 $outputHandle = OpenRawIO($td, 'php://output', 'w', $SocketHandle);
 TransferData($SocketHandle,$outputHandle,$td,"crypt");
 
