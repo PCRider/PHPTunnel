@@ -47,14 +47,14 @@ function LogLine($ll,$msg, $dest="./log",$lname="log",$lsize=10000) {
  */
 function OpenCryptModule($key){
     if(!is_null($key)){
-	    $td = mcrypt_module_open(MCRYPT_ARCFOUR, '', MCRYPT_MODE_STREAM, '');
+	    // $td = mcrypt_module_open(MCRYPT_ARCFOUR, '', MCRYPT_MODE_STREAM, '');
     }
 	if(!is_resource($td))
 	{
 		header('HTTP/1.0 500 Internal Server Error');
 		die();
 	}
-	mcrypt_generic_init($td, $key, '');
+	// mcrypt_generic_init($td, $key, '');
 	return $td;
 }
 /**
@@ -66,8 +66,8 @@ function OpenRawIO($td, $io, $rw, $socket=null){
 	$IOHandle = fopen($io, $rw);
 	if(!$IOHandle){
 		if($socket){fclose($socket);}
-		mcrypt_generic_deinit($td);
-		mcrypt_module_close($td);
+		// mcrypt_generic_deinit($td);
+		// mcrypt_module_close($td);
 		header('HTTP/1.0 500 Internal Server Error');
 		die();
 	}
@@ -90,7 +90,7 @@ function HTTPHeaderReader($IOHandle,$td,$decrypt){
 		if($buffer_length > 0)
 		{
 			# i am not sure how
-			$http_header = $http_header . ($decrypt ? mdecrypt_generic($td, $buffer) : $buffer) ;
+			$http_header = $http_header . ($decrypt ?rc4($key, $buffer) : $buffer) ;
 			$http_header_length = strlen($http_header);
 			
 			if($http_header_length >= 4)
@@ -113,12 +113,12 @@ function HTTPHeaderReader($IOHandle,$td,$decrypt){
 function OutputERR($msg,$td,$key){
     $time = gmdate('D, d M Y H:i:s T', time());
     $headermessage = "\r\nHTTP/1.1 200 OK\r\nContent-Type: text/html;charset=utf8\r\n\r\n<html><head><title>PHPTunnel Error</title></head><body><h1>{$msg}</h1></body></html>";
-    mcrypt_generic_init($td, $key, '');	
+    // mcrypt_generic_init($td, $key, '');	
 	$rawOutputHandle = OpenRawIO($td, 'php://output', 'w');
-    fwrite($rawOutputHandle, mcrypt_generic($td, $headermessage));
+    fwrite($rawOutputHandle, rc4($key, $headermessage));
     fclose($rawOutputHandle);
-    mcrypt_generic_deinit($td);
-    mcrypt_module_close($td);
+    // mcrypt_generic_deinit($td);
+    // mcrypt_module_close($td);
     die();
 }
 
@@ -180,8 +180,8 @@ function OpenSocket($http_header_value,$force,$IOHandle,$td){
 	}
 	if(!$SocketHandle){
 		fclose($IOHandle);
-		mcrypt_generic_deinit($td);
-		mcrypt_module_close($td);
+		// mcrypt_generic_deinit($td);
+		// mcrypt_module_close($td);
 		header('HTTP/1.0 500 Internal Server Error');
 		die();
 	}
@@ -193,10 +193,10 @@ function TransferData($from,$to,$td,$type){
 			$buffer_length = strlen($buffer);
 		if($buffer_length > 0){
 		    if($type =="crypt"){
-		        fwrite($to, mcrypt_generic($td, $buffer));
+		        fwrite($to, rc4($key, $buffer));
 		    }
 			else if($type =="decrypt"){
-	        	fwrite($to, mdecrypt_generic($td, $buffer));
+	        	fwrite($to,rc4($key, $buffer));
 	        }
 		}
 	}
